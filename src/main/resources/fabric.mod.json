@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "suikefoxfriend",
+	"version": "5.1.6",
+	"name": "Fox Friend",
+	"description": "Mod originally by sui_ke, (painfully) updated to 1.21.11 and upgraded by Suny",
+	"authors": [
+		"sui_ke", "Suny"
+	],
+	"license": "MIT",
+	"icon": "assets/suikefoxfriend/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"suike.suikefoxfriend.SuiKe"
+		]
+	},
+	"mixins": [
+		"suikefoxfriend.mixins.json"
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": ">=1.21.9",
+		"java": "*",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

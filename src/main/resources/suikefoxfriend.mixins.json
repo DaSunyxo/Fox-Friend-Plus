@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "suike.suikefoxfriend.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AttackGoalMixin",
+    "EntityAccessor",
+    "FleeEntityGoalMixin",
+    "FoxEntityMixin",
+    "JumpChasingGoalMixin",
+    "LivingEntityAccessor",
+    "LivingEntityMixin",
+    "MobEntityAccessor",
+    "MobEntityMixin",
+    "MoveToHuntGoalMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1 }
+}
