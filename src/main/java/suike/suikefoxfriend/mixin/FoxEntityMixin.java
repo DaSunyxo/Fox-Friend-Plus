@@ -59,7 +59,6 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
     private int foxNameWaitingTicks = 0;
     private static Random random = new Random();
     private FoxFollowOwnerGoal foxFollowOwnerGoal;
-    private static final Logger LOGGER = LogUtils.getLogger();
     private boolean isSleeping = false;
     private int sleepingTime = 0;
     public boolean getIsSleeping() {return this.isSleeping;}

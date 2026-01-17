@@ -8,7 +8,6 @@
     "FleeEntityGoalMixin",
     "FoxEntityMixin",
     "JumpChasingGoalMixin",
-    "LivingEntityAccessor",
     "LivingEntityMixin",
     "MobEntityAccessor",
     "MobEntityMixin",

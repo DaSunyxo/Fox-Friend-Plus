@@ -157,8 +157,7 @@ public class FoxFollowOwnerGoal extends Goal {
             return false;
         } else {
             BlockState blockState = this.world.getBlockState(pos.down());
-            BlockState otherBlockState = this.world.getBlockState(pos);
-            if (blockState.getBlock() instanceof LeavesBlock || otherBlockState.getBlock() instanceof RailBlock || otherBlockState.getBlock() instanceof PoweredRailBlock) {
+            if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() instanceof RailBlock || blockState.getBlock() instanceof PoweredRailBlock) {
                 return false;
             } else {
                 BlockPos blockPos = pos.subtract(this.fox.getBlockPos());
