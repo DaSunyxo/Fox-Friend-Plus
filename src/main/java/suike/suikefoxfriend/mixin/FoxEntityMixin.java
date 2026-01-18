@@ -268,6 +268,15 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
         FoxEntity foxEntity = (FoxEntity) (Object) this;
 
         if (((IOwnable) foxEntity).isTamed() && ((MobEntityAccessor) this).getGoalSelector().getGoals().contains(new FoxAttackWithOwnerGoal(foxEntity))) ((MobEntityAccessor) this).getGoalSelector().add(3, new FoxAttackWithOwnerGoal(foxEntity));
+        if (((IOwnable) foxEntity).isTamed()
+                && (foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH).getValue() != 40
+                || foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE).getValue() != 4.0)) {
+            EntityAttributeInstance attackDamage = foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+            attackDamage.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            EntityAttributeInstance maxHealth = foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH);
+            maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            foxEntity.setHealth(40f);
+        }
 
         ChunkPos foxChunkPos = foxEntity.getChunkPos();
         World foxWorld = foxEntity.getEntityWorld();
