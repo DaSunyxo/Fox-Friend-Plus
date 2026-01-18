@@ -274,7 +274,7 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
         ChunkManager foxChunkManager = foxWorld.getChunkManager();
         //Check if the chunk the fox is in is already forced. If it's not, mark it as such and
         //add it to a list of chunks forced by the fox. Then, every tick, check if the fox left the chunk it
-        //forced, and if it did, unforce that chunk and remove it from the list of fox forced chunks.
+        //forced, and if it did, "unforce" that chunk and remove it from the list of fox forced chunks.
         if (this.foxForcedChunks == null) this.foxForcedChunks = new LinkedList<>(); //Fixes broken foxes crashing the game (woopsies :3)
         if (!isChunkForced(foxWorld, foxChunkPos)) {
             foxChunkManager.setChunkForced(foxChunkPos, true);
