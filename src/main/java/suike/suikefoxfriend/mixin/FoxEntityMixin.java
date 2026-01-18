@@ -8,7 +8,12 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.mob.GhastEntity;
+import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
@@ -20,6 +25,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import suike.suikefoxfriend.SuiKe;
 import suike.suikefoxfriend.api.*;
+import suike.suikefoxfriend.entity.ai.FoxAttackWithOwnerGoal;
 import suike.suikefoxfriend.entity.ai.FoxWaitingGoal;
 import suike.suikefoxfriend.entity.ai.FoxFollowOwnerGoal;
 
@@ -109,6 +115,17 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
         }
     }
 
+    public boolean canAttackWithOwner(LivingEntity target, LivingEntity owner) {
+        if (target instanceof CreeperEntity || target instanceof GhastEntity || target instanceof ArmorStandEntity) return false;
+        else if (target instanceof TameableEntity) return !((TameableEntity) target).isTamed();
+        else if (target instanceof FoxEntity) return !((IOwnable) target).isTamed();else if (target instanceof PlayerEntity playerEntity && owner instanceof PlayerEntity playerEntity2 && !playerEntity2.shouldDamagePlayer(playerEntity)) return false;
+        else {
+            return target instanceof AbstractHorseEntity abstractHorseEntity && abstractHorseEntity.isTame()
+                    ? false
+                    : !(target instanceof TameableEntity tameableEntity && tameableEntity.isTamed());
+        }
+    }
+
     public void playerTamedFox(PlayerEntity player) {
         if (player != null) {
             FoxEntity foxEntity = (FoxEntity) (Object) this;
@@ -124,6 +141,7 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
             this.foxFollowOwnerGoal = new FoxFollowOwnerGoal(foxEntity);
             ((MobEntityAccessor) this).getGoalSelector().add(4, this.foxFollowOwnerGoal);
             ((MobEntityAccessor) this).getGoalSelector().add(-1, new FoxWaitingGoal(foxEntity));
+            ((MobEntityAccessor) this).getGoalSelector().add(3, new FoxAttackWithOwnerGoal(foxEntity));
         }
     }
 

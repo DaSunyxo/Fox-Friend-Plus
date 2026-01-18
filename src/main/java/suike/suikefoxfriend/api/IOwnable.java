@@ -7,6 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 public interface IOwnable {
     DefaultAttributeContainer.Builder createFoxAttributes();
 
+    boolean canAttackWithOwner(LivingEntity target, LivingEntity owner);
+
     void playerTamedFox(PlayerEntity player);
 
     boolean isTamed();
