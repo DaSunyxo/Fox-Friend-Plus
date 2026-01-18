@@ -131,10 +131,12 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
             FoxEntity foxEntity = (FoxEntity) (Object) this;
             this.setOwner(player);
             EntityAttributeInstance maxHealth = foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH);
-            maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 10.0, EntityAttributeModifier.Operation.ADD_VALUE));
-            foxEntity.setHealth(20f);
+            maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            foxEntity.setHealth(40f);
             EntityAttributeInstance armor = foxEntity.getAttributeInstance(EntityAttributes.ARMOR);
-            armor.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_armour"), 10, EntityAttributeModifier.Operation.ADD_VALUE));
+            armor.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_armour"), 10.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            EntityAttributeInstance attackDamage = foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+            attackDamage.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE));
             this.setWaiting(true);
             this.mixinStopActions();
             foxEntity.setPersistent();
@@ -264,6 +266,9 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
         }
 
         FoxEntity foxEntity = (FoxEntity) (Object) this;
+
+        if (((IOwnable) foxEntity).isTamed() && ((MobEntityAccessor) this).getGoalSelector().getGoals().contains(new FoxAttackWithOwnerGoal(foxEntity))) ((MobEntityAccessor) this).getGoalSelector().add(3, new FoxAttackWithOwnerGoal(foxEntity));
+
         ChunkPos foxChunkPos = foxEntity.getChunkPos();
         World foxWorld = foxEntity.getEntityWorld();
         ChunkManager foxChunkManager = foxWorld.getChunkManager();

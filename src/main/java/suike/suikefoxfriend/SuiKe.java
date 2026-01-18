@@ -52,14 +52,15 @@ public class SuiKe implements ModInitializer {
                     Item handItem = player.getMainHandStack().getItem();
 					if (foxIOwnable.isTamed() && handItem != Items.SWEET_BERRIES && handItem != Items.NAME_TAG && handItem != Items.LEAD) {
                         //If player is sneak right-clicking, drop item in mouth
-                        if (player.isSneaking()) {
+                        if (player.isSneaking() && player.equals(foxIOwnable.getOwner())) {
                             ItemStack stack = foxEntity.getEquippedStack(EquipmentSlot.MAINHAND);
                             if (!stack.equals(ItemStack.EMPTY)) {
-                                ItemStack droppedStack = stack.copyAndEmpty();
+                                ItemStack droppedStack = stack;
+                                foxEntity.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
                                 ItemEntity itemEntity = new ItemEntity(
                                         foxEntity.getEntityWorld(), foxEntity.getX() + foxEntity.getRotationVector().x, foxEntity.getY() + 1.0, foxEntity.getZ() + foxEntity.getRotationVector().z, droppedStack
                                 );
-                                itemEntity.setPickupDelay(40);
+                                itemEntity.setPickupDelay(20);
                                 itemEntity.setThrower(foxEntity);
                                 foxEntity.playSound(SoundEvents.ENTITY_FOX_SPIT, 1.0F, 1.0F);
                                 foxEntity.getEntityWorld().spawnEntity(itemEntity);
