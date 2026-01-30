@@ -114,23 +114,27 @@ public class FoxFollowOwnerGoal extends Goal {
                     x += this.getRandomInt(-3, 3);
                     y += this.getRandomInt(-1, 1);
                     z += this.getRandomInt(1, 3);
+                    break;
                 }
                 case SOUTH : {
                     x += this.getRandomInt(-3, 3);
                     y += this.getRandomInt(-1, 1);
                     z += this.getRandomInt(-3, -1);
+                    break;
                 }
 
                 case WEST : {
                     x += this.getRandomInt(1, 3);
                     y += this.getRandomInt(-1, 1);
                     z += this.getRandomInt(-3, 3);
+                    break;
                 }
 
                 case EAST : {
                     x += this.getRandomInt(-3, -1);
                     y += this.getRandomInt(-1, 1);
                     z += this.getRandomInt(-3, 3);
+                    break;
                 }
             }
             if (this.tryTeleportTo(x, y, z)) {
