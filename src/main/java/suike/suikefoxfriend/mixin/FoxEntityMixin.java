@@ -98,6 +98,9 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
 
 
     private LinkedList<ChunkPos> foxForcedChunks = new LinkedList<>();
+    private boolean hasAttackWithOwnerGoal = ((MobEntityAccessor) (Object) this).getGoalSelector().getGoals().contains(new FoxAttackWithOwnerGoal((FoxEntity) (Object) this));
+    private boolean hasTamedMaxHealth = ((FoxEntity) (Object) this).getAttributes().hasModifierForAttribute(EntityAttributes.MAX_HEALTH, Identifier.of("tamed_max_health"));
+    private boolean hasTamedAttackDamage = ((FoxEntity) (Object) this).getAttributes().hasModifierForAttribute(EntityAttributes.ATTACK_DAMAGE, Identifier.of("tamed_mattack_damage"));
     private static final TrackedData<Byte> TAMEABLE_FLAGS = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.BYTE);
     private static final TrackedData<String> OWNER_UUID = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.STRING);
     private static final TrackedData<Boolean> WAITING_FLAG = DataTracker.registerData(FoxEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -133,10 +136,12 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
             EntityAttributeInstance maxHealth = foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH);
             maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE));
             foxEntity.setHealth(40f);
+            this.hasTamedMaxHealth = true;
             EntityAttributeInstance armor = foxEntity.getAttributeInstance(EntityAttributes.ARMOR);
             armor.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_armour"), 10.0, EntityAttributeModifier.Operation.ADD_VALUE));
             EntityAttributeInstance attackDamage = foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
             attackDamage.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            this.hasTamedAttackDamage = true;
             this.setWaiting(true);
             this.mixinStopActions();
             foxEntity.setPersistent();
@@ -144,6 +149,7 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
             ((MobEntityAccessor) this).getGoalSelector().add(4, this.foxFollowOwnerGoal);
             ((MobEntityAccessor) this).getGoalSelector().add(-1, new FoxWaitingGoal(foxEntity));
             ((MobEntityAccessor) this).getGoalSelector().add(3, new FoxAttackWithOwnerGoal(foxEntity));
+            this.hasAttackWithOwnerGoal = true;
         }
     }
 
@@ -266,16 +272,30 @@ public abstract class FoxEntityMixin implements IOwnable {//, Tameable {
         }
 
         FoxEntity foxEntity = (FoxEntity) (Object) this;
+        IOwnable foxIOwnable = (IOwnable) foxEntity;
 
-        if (((IOwnable) foxEntity).isTamed() && ((MobEntityAccessor) this).getGoalSelector().getGoals().contains(new FoxAttackWithOwnerGoal(foxEntity))) ((MobEntityAccessor) this).getGoalSelector().add(3, new FoxAttackWithOwnerGoal(foxEntity));
-        if (((IOwnable) foxEntity).isTamed()
-                && (foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH).getPersistentModifiers().contains(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE))
-                || foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE).getPersistentModifiers().contains(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE)))) {
-            EntityAttributeInstance attackDamage = foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
-            attackDamage.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE));
-            EntityAttributeInstance maxHealth = foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH);
-            maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE));
-            foxEntity.setHealth(40f);
+        if (((IOwnable) foxEntity).isTamed() && !((MobEntityAccessor) this).getGoalSelector().getGoals().contains(new FoxAttackWithOwnerGoal(foxEntity))) ((MobEntityAccessor) this).getGoalSelector().add(3, new FoxAttackWithOwnerGoal(foxEntity));
+        try {
+            if (foxIOwnable.isTamed() && !(foxEntity.getAttributes().getModifierValue(EntityAttributes.ATTACK_DAMAGE, Identifier.of("tamed_attack_damage")) == 2.0)) {
+                EntityAttributeInstance attackDamage = foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+                attackDamage.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            }} catch (IllegalArgumentException e) {
+            if (foxIOwnable.isTamed()) {
+                EntityAttributeInstance attackDamage = foxEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+                attackDamage.addPersistentModifier(new EntityAttributeModifier(Identifier.of("tamed_attack_damage"), 2.0, EntityAttributeModifier.Operation.ADD_VALUE));
+            }
+        }
+        try {
+            if (foxIOwnable.isTamed() && !(foxEntity.getAttributes().getModifierValue(EntityAttributes.MAX_HEALTH, Identifier.of("tamed_max_health")) == 30.0)) {
+                EntityAttributeInstance maxHealth = foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH);
+                maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE));
+                foxEntity.setHealth(40f);
+            }} catch (IllegalArgumentException e) {
+            if (foxIOwnable.isTamed()) {
+                EntityAttributeInstance maxHealth = foxEntity.getAttributeInstance(EntityAttributes.MAX_HEALTH);
+                maxHealth.addPersistentModifier(new EntityAttributeModifier((Identifier.of("tamed_max_health")), 30.0, EntityAttributeModifier.Operation.ADD_VALUE));
+                foxEntity.setHealth(40f);
+            }
         }
 
         ChunkPos foxChunkPos = foxEntity.getChunkPos();
