@@ -2,23 +2,23 @@ package suike.suikefoxfriend;
 
 import java.util.List;
 
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.AirBlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import suike.suikefoxfriend.api.IOwnable;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.Version;
@@ -45,46 +45,46 @@ public class SuiKe implements ModInitializer {
     @Override
     public void onInitialize() {
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (hand == Hand.MAIN_HAND && !world.isClient()) {
+            if (hand == InteractionHand.MAIN_HAND && !world.isClientSide()) {
                 // 检查是否是右键点击
-				if (entity instanceof FoxEntity foxEntity) {
+				if (entity instanceof Fox foxEntity) {
                     IOwnable foxIOwnable = ((IOwnable) entity);
-                    Item handItem = player.getMainHandStack().getItem();
+                    Item handItem = player.getMainHandItem().getItem();
 					if (foxIOwnable.isTamed() && handItem != Items.SWEET_BERRIES && handItem != Items.NAME_TAG && handItem != Items.LEAD) {
                         //If player is sneak right-clicking, drop item in mouth
-                        if (player.isSneaking() && player.equals(foxIOwnable.getOwner())) {
-                            ItemStack stack = foxEntity.getEquippedStack(EquipmentSlot.MAINHAND);
+                        if (player.isCrouching() && player.equals(foxIOwnable.getOwner())) {
+                            ItemStack stack = foxEntity.getMainHandItem();
                             if (!stack.equals(ItemStack.EMPTY)) {
                                 ItemStack droppedStack = stack;
-                                foxEntity.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                                foxEntity.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
                                 ItemEntity itemEntity = new ItemEntity(
-                                        foxEntity.getEntityWorld(), foxEntity.getX() + foxEntity.getRotationVector().x, foxEntity.getY() + 1.0, foxEntity.getZ() + foxEntity.getRotationVector().z, droppedStack
+                                        foxEntity.level(), foxEntity.getX() + foxEntity.getRotationVector().x, foxEntity.getY() + 1.0, foxEntity.getZ(), droppedStack
                                 );
-                                itemEntity.setPickupDelay(20);
+                                itemEntity.setPickUpDelay(20);
                                 itemEntity.setThrower(foxEntity);
-                                foxEntity.playSound(SoundEvents.ENTITY_FOX_SPIT, 1.0F, 1.0F);
-                                foxEntity.getEntityWorld().spawnEntity(itemEntity);
-                                player.swingHand(Hand.MAIN_HAND, true);
+                                foxEntity.playSound(SoundEvents.FOX_EAT, 1.0F, 1.0F);
+                                foxEntity.level().addFreshEntity(itemEntity);
+                                player.swing(InteractionHand.MAIN_HAND, true);
                             }
                         }
                         // 设置等待状态
                         else {
                             foxIOwnable.playerSetWaiting(player);
-                            return ActionResult.SUCCESS;
+                            return InteractionResult.SUCCESS;
                         }
 
 					} else if (!foxIOwnable.isTamed() && handItem == Items.SWEET_BERRIES) {
-                        if (!player.getAbilities().creativeMode) {
-                            player.getMainHandStack().decrement(1);
+                        if (!player.gameMode().isCreative()) {
+                            player.getMainHandItem().setCount(player.getMainHandItem().count() - 1);
                         }
 
                         // 设为驯服
                         foxIOwnable.playerTamedFox(player);
-						return ActionResult.SUCCESS;
+						return InteractionResult.SUCCESS;
                     }
 				}
             }
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
     }
 }

@@ -4,13 +4,11 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AttackGoalMixin",
-    "EntityAccessor",
-    "FleeEntityGoalMixin",
-    "FoxEntityMixin",
+    "AvoidEntityGoalMixin",
+    "FoxMixin",
     "JumpChasingGoalMixin",
-    "LivingEntityMixin",
-    "MobEntityAccessor",
-    "MobEntityMixin",
+    "EntityMixin",
+    "MobAccessor",
     "MoveToHuntGoalMixin"
   ],
   "injectors": {

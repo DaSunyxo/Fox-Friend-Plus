@@ -1,21 +1,21 @@
 package suike.suikefoxfriend.api;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.player.Player;
 
 public interface IOwnable {
-    DefaultAttributeContainer.Builder createFoxAttributes();
+    AttributeSupplier.Builder createFoxAttributes();
 
     boolean canAttackWithOwner(LivingEntity target, LivingEntity owner);
 
-    void playerTamedFox(PlayerEntity player);
+    void playerTamedFox(Player player);
 
     boolean isTamed();
 
     boolean isWaiting();
 
-    void playerSetWaiting(PlayerEntity player);
+    void playerSetWaiting(Player player);
 
     void setWaiting(boolean waiting);
 

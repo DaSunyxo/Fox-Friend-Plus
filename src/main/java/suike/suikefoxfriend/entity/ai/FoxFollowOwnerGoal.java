@@ -3,42 +3,42 @@ package suike.suikefoxfriend.entity.ai;
 import java.util.Random;
 import java.util.EnumSet;
 
-import net.minecraft.block.PoweredRailBlock;
-import net.minecraft.block.RailBlock;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.block.PoweredRailBlock;
+import net.minecraft.world.level.block.RailBlock;
+import net.minecraft.core.Direction;
 import suike.suikefoxfriend.api.IOwnable;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.pathing.PathNodeType;
-import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
-import net.minecraft.world.World;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.level.Level;
+import net.minecraft.core.BlockPos;
 
 public class FoxFollowOwnerGoal extends Goal {
-    private final FoxEntity fox;
-    private final World world;
+    private final Fox fox;
+    private final Level world;
     private final double speed = 1.0D;
     private final float minDistance = 10.0F;
     private final float maxDistance = 20.0F;
     private LivingEntity owner;
     private int updateCountdownTicks;
 
-    public FoxFollowOwnerGoal(FoxEntity fox) {
+    public FoxFollowOwnerGoal(Fox fox) {
         this.fox = fox;
-        this.world = fox.getEntityWorld();
-        this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
+        this.world = fox.level();
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         LivingEntity owner = ((IOwnable) this.fox).getOwner();
         if (owner == null || owner.isSpectator() || this.cannotFollow()) {
             return false;
-        } else if (this.fox.squaredDistanceTo(owner) < (double) (this.minDistance * this.minDistance)) {
+        } else if (this.fox.distanceTo(owner) < (double) this.minDistance) {
             return false;
         } else {
             this.owner = owner;
@@ -47,10 +47,10 @@ public class FoxFollowOwnerGoal extends Goal {
     }
 
     @Override
-    public boolean shouldContinue() {
+    public boolean canContinueToUse() {
         if (this.cannotFollow()) {
             return false;
-        } else if (this.fox.squaredDistanceTo(((IOwnable) this.fox).getOwner()) <= (double) (this.maxDistance * this.maxDistance)) {
+        } else if (this.fox.distanceTo(((IOwnable) this.fox).getOwner()) <= (double) this.maxDistance) {
             return false;
         } else {
             return true;
@@ -78,22 +78,22 @@ public class FoxFollowOwnerGoal extends Goal {
             return;
         }
         // 看向主人
-        this.fox.getLookControl().lookAt(this.owner, 10.0F, (float) this.fox.getMaxLookPitchChange());
+        this.fox.getLookControl().setLookAt(this.owner, 10.0F, (float) this.fox.getMaxHeadXRot());
 
         // 是否传送到主人
         if (--this.updateCountdownTicks <= 0) {
             this.updateCountdownTicks = 10;
-            if (this.fox.squaredDistanceTo(this.owner) >= 144.0D) {
+            if (this.fox.distanceToSqr(this.owner) >= 144.0D) {
                 this.tryTeleport();
             } else if (!this.fox.isSleeping() && !this.fox.isSitting()) {
-                this.fox.getNavigation().startMovingTo(this.owner, this.speed);
+                this.fox.getNavigation().moveTo(this.owner, this.speed);
             }
         }
     }
 
     public boolean teleport() {
         this.owner = ((IOwnable) this.fox).getOwner();;
-        if (owner != null && this.fox.squaredDistanceTo(this.owner) >= 144.0D) {
+        if (owner != null && this.fox.distanceToSqr(this.owner) >= 144.0D) {
             this.tryTeleport();
             this.owner = null;
             return true;
@@ -103,8 +103,8 @@ public class FoxFollowOwnerGoal extends Goal {
     }
 
     private void tryTeleport() {
-        BlockPos ownerPos = this.owner.getBlockPos();
-        Direction ownerFacing = this.owner.getHorizontalFacing();
+        BlockPos ownerPos = this.owner.getOnPos();
+        Direction ownerFacing = this.owner.getDirection();
         for (int i = 0; i < 10; ++i) {
             int x = ownerPos.getX();
             int y = ownerPos.getY();
@@ -149,23 +149,23 @@ public class FoxFollowOwnerGoal extends Goal {
         } else if (!this.canTeleportTo(new BlockPos(x, y, z))) {
             return false;
         } else {
-            this.fox.refreshPositionAndAngles((double) x + 0.5D, (double) y, (double) z + 0.5D, this.fox.getYaw(), this.fox.getPitch());
+            this.fox.setPos((double) x + 0.5D, (double) y, (double) z + 0.5D);
             this.fox.getNavigation().stop();
             return true;
         }
     }
 
     private boolean canTeleportTo(BlockPos pos) {
-        PathNodeType pathNodeType = LandPathNodeMaker.getLandNodeType(this.fox, pos.mutableCopy());
-        if (pathNodeType != PathNodeType.WALKABLE) {
+        PathType pathNodeType = WalkNodeEvaluator.getPathTypeStatic(this.fox, pos.mutable());
+        if (pathNodeType != PathType.WALKABLE) {
             return false;
         } else {
-            BlockState blockState = this.world.getBlockState(pos.down());
-            if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() instanceof RailBlock || blockState.getBlock() instanceof PoweredRailBlock) {
+            BlockState blockState = this.world.getBlockState(pos.below());
+            if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() instanceof PoweredRailBlock || blockState.getBlock() instanceof PoweredRailBlock) {
                 return false;
             } else {
-                BlockPos blockPos = pos.subtract(this.fox.getBlockPos());
-                return this.world.isSpaceEmpty(this.fox, this.fox.getBoundingBox().offset(blockPos));
+                BlockPos blockPos = pos.subtract(this.fox.getOnPos());
+                return this.world.isEmptyBlock(blockPos);
             }
         }
     }
