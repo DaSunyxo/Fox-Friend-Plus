@@ -80,6 +80,7 @@ public class SuiKe implements ModInitializer {
 
                         // 设为驯服
                         foxIOwnable.playerTamedFox(player);
+                        player.swing(InteractionHand.MAIN_HAND, true);
 						return InteractionResult.SUCCESS;
                     }
 				}

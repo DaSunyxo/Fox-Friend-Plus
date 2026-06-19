@@ -6,6 +6,8 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.serialization.Codec;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.attribute.modifier.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -49,7 +51,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,8 +63,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import org.slf4j.Logger;
 
-// TODO(Ravel): can not resolve target class FoxEntity
-// TODO(Ravel): can not resolve target class FoxEntity
 @Mixin(Fox.class)
 public abstract class FoxMixin implements IOwnable {//, Tameable {
 
@@ -75,41 +74,25 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
     private int sleepingTime = 0;
     public boolean getIsSleeping() {return this.isSleeping;}
 
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow abstract void clearStates();
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow abstract void setSleeping(boolean sleeping);
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow abstract void setDefending(boolean aggressive);
 
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private static Codec<List<EntityReference<LivingEntity>>> TRUSTED_LIST_CODEC;
 
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private static int MIN_TICKS_BEFORE_EAT;
 
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private static int FLAG_SITTING;
 
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow
     private int ticksSinceEaten;
 
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private static EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_TRUSTED_ID_1;
@@ -285,8 +268,6 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
         return forcedChunks.contains(chunkPos.pack());
     }
 
-// TODO(Ravel): no target class
-// TODO(Ravel): no target class
 //tick方法
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
@@ -446,8 +427,6 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
         return false;
     }
 
-// TODO(Ravel): no target class
-// TODO(Ravel): no target class
 //禁止等待时停止睡觉
     @Inject(method = "wakeUp", at = @At("HEAD"), cancellable = true)
     private void onStopSleeping(CallbackInfo ci) {
@@ -456,8 +435,6 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
         }
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
     @Inject(method = "aiStep", at = @At("HEAD"))
     private void onTickMovement(CallbackInfo ci) {
         Fox foxEntity = ((Fox) (Object) this);
@@ -486,16 +463,10 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
     }
 }
 
-// TODO(Ravel): can not resolve target class MobEntity
-// TODO(Ravel): can not resolve target class MobEntity
 @Mixin(Mob.class)
 interface MobAccessor {
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Accessor("navigation")
     PathNavigation getNavigation();
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Accessor("goalSelector")
     GoalSelector getGoalSelector();
 }
