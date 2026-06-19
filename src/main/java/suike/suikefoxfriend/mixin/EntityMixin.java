@@ -18,7 +18,7 @@ public class EntityMixin {
 
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     public void onHurt(DamageSource source, float damage, CallbackInfo ci) {
-        if (((LivingEntity) (Object) this) instanceof Fox && source.getEntity() instanceof Avatar) {
+        if (((Entity) (Object) this) instanceof Fox && source.getEntity() instanceof Avatar) {
             Fox fox = (Fox) (Object) this;
             if (((IOwnable) fox).isTamed()) ci.cancel();
         }
