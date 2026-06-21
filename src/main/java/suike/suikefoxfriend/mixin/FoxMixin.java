@@ -345,12 +345,6 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
             }
         }
 
-        if (!isWaiting() && this.foxFollowOwnerGoal != null) {
-            if (this.foxFollowOwnerGoal.teleport()) { // 尝试传送到主人
-                return;
-            }
-        }
-
         Level world = foxEntity.level();
         BlockPos pos = foxEntity.getOnPos();
         FluidState fluidState = world.getFluidState(pos);
@@ -455,7 +449,7 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
                 if (sleepingTime % 40 == 0) foxEntity.heal(1f);
             }
             ticksSinceEaten--;
-            //Increase damage dealt based on held item
+            //Increase damage dealt based on held item (useless because vanilla Minecraft already does this)
 //            AttributeInstance damage = foxEntity.getAttribute(EntityAttributes.ATTACK_DAMAGE);
 //            damage.clearModifiers();
 //            damage.addTemporaryModifier(new AttributeModifier((Identifier.of("held_item_damage")), foxEntity.getEquippedStack(EquipmentSlot.MAINHAND).getDamage(), AttributeModifier.Operation.ADD_VALUE));

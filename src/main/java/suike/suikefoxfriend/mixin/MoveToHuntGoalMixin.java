@@ -24,16 +24,6 @@ public abstract class MoveToHuntGoalMixin {
         this.fox = fox;
     }
 
-    @Inject(method = "start", at = @At("HEAD"))
-    private void onStart(CallbackInfo ci) {
-        SuiKe.LOGGER.warn("Started MoveToHuntGoal!");
-    }
-
-    @Inject(method = "stop", at = @At("HEAD"))
-    private void onStop(CallbackInfo ci) {
-        SuiKe.LOGGER.warn("Stopped MoveToHuntGoal!");
-    }
-
     @ModifyReturnValue(method = "canUse", at = @At("RETURN"))
     private boolean checkIfFoxTamed(boolean original) {
         return original && !(((IOwnable) this.fox).isTamed());
@@ -43,7 +33,6 @@ public abstract class MoveToHuntGoalMixin {
     public void onTick(CallbackInfo ci) {
         LivingEntity livingEntity = fox.getTarget();
         if (((IOwnable) fox).isTamed()) {
-            SuiKe.LOGGER.warn("Trying to stop MoveToHuntGoal");
             fox.setIsInterested(true);
             fox.setIsCrouching(true);
             fox.getNavigation().stop();

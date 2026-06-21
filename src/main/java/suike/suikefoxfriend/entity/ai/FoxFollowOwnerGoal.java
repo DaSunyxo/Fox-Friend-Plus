@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.core.Direction;
+import suike.suikefoxfriend.SuiKe;
 import suike.suikefoxfriend.api.IOwnable;
 
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,6 +30,7 @@ public class FoxFollowOwnerGoal extends Goal {
 
     public FoxFollowOwnerGoal(Fox fox) {
         this.fox = fox;
+        this.owner = ((IOwnable) this.fox).getOwner();
         this.world = fox.level();
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
@@ -36,6 +38,7 @@ public class FoxFollowOwnerGoal extends Goal {
     @Override
     public boolean canUse() {
         LivingEntity owner = ((IOwnable) this.fox).getOwner();
+        this.owner = owner;
         if (owner == null || owner.isSpectator() || this.cannotFollow()) {
             return false;
         } else if (this.fox.distanceTo(owner) < (double) this.minDistance) {
@@ -48,9 +51,13 @@ public class FoxFollowOwnerGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        if (this.cannotFollow()) {
+        if (this.owner == null) {
             return false;
-        } else if (this.fox.distanceTo(((IOwnable) this.fox).getOwner()) <= (double) this.maxDistance) {
+        } else if (this.cannotFollow()) {
+            return false;
+        } else if (this.fox.distanceTo(this.owner) >= (double) this.maxDistance || this.fox.distanceTo(this.owner) < 2.0) {
+            return false;
+        } else if (this.fox.getNavigation().isDone()) {
             return false;
         } else {
             return true;
@@ -63,6 +70,7 @@ public class FoxFollowOwnerGoal extends Goal {
 
     @Override
     public void start() {
+        this.owner = ((IOwnable) this.fox).getOwner();
         this.updateCountdownTicks = 0;
     }
 
@@ -82,10 +90,10 @@ public class FoxFollowOwnerGoal extends Goal {
 
         // 是否传送到主人
         if (--this.updateCountdownTicks <= 0) {
-            this.updateCountdownTicks = 10;
+            this.updateCountdownTicks = this.adjustedTickDelay(10);
             if (this.fox.distanceToSqr(this.owner) >= 144.0D) {
                 this.tryTeleport();
-            } else if (!this.fox.isSleeping() && !this.fox.isSitting()) {
+            } else if (this.fox.canMove()) {
                 this.fox.getNavigation().moveTo(this.owner, this.speed);
             }
         }
