@@ -7,7 +7,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 
 import suike.suikefoxfriend.SuiKe;
-import suike.suikefoxfriend.payloads.AskClientForModPayload;
 
 import java.util.concurrent.CompletableFuture;
 
