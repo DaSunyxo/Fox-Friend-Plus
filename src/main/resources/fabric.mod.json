@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "suikefoxfriend",
+	"version": "5.1.8.5",
+	"name": "Fox Friend Remastered",
+	"description": "Mod originally by sui_ke, updated and upgraded by Suny",
+	"authors": [
+		"sui_ke",
+		"Suny"
+	],
+	"license": "MIT",
+	"icon": "assets/suikefoxfriend/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"suike.suikefoxfriend.SuiKe"
+		],
+		"client": [
+			"suike.suikefoxfriend.client.FoxFriendClient"
+		],
+		"fabric-datagen": [
+			"suike.suikefoxfriend.client.FoxFriendDataGenerator"
+		]
+	},
+	"mixins": [
+		"suikefoxfriend.mixins.json",
+		{
+			"config": "suikefoxfriend.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": ">=26.2",
+		"java": "*",
+		"fabric-api": "*"
+	}
+}
