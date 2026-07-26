@@ -7,6 +7,10 @@ import net.minecraft.world.entity.player.Player;
 public interface IOwnable {
     AttributeSupplier.Builder createFoxAttributes();
 
+    boolean isSleepingWithOwner();
+
+    void setSleepingWithOwner(boolean sleeping);
+
     boolean canAttackWithOwner(LivingEntity target, LivingEntity owner);
 
     void playerTamedFox(Player player);

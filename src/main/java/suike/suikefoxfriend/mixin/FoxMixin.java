@@ -2,15 +2,10 @@ package suike.suikefoxfriend.mixin;
 
 import java.util.*;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.serialization.Codec;
-import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.advancements.triggers.CriteriaTriggers;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.attribute.modifier.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,20 +13,18 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import suike.suikefoxfriend.SuiKe;
 import suike.suikefoxfriend.api.*;
 import suike.suikefoxfriend.entity.ai.FoxAttackWithOwnerGoal;
+import suike.suikefoxfriend.entity.ai.FoxSleepWithOwnerGoal;
 import suike.suikefoxfriend.entity.ai.FoxWaitingGoal;
 import suike.suikefoxfriend.entity.ai.FoxFollowOwnerGoal;
 
@@ -60,8 +53,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import org.slf4j.Logger;
 
 @Mixin(Fox.class)
 public abstract class FoxMixin implements IOwnable {//, Tameable {
@@ -103,12 +94,17 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
 
 
     private LinkedList<ChunkPos> foxForcedChunks = new LinkedList<>();
-    private boolean hasAttackWithOwnerGoal = ((MobAccessor) (Object) this).getGoalSelector().getAvailableGoals().contains(new FoxAttackWithOwnerGoal((Fox) (Object) this));
-    private boolean hasTamedMaxHealth = ((Fox) (Object) this).getAttributes().hasModifier(Attributes.MAX_HEALTH, Identifier.fromNamespaceAndPath(SuiKe.MOD_ID, "tamed_max_health"));
-    private boolean hasTamedAttackDamage = ((Fox) (Object) this).getAttributes().hasModifier(Attributes.ATTACK_DAMAGE, Identifier.fromNamespaceAndPath(SuiKe.MOD_ID, "tamed_mattack_damage"));
     private static final EntityDataAccessor<Byte> TAMEABLE_FLAGS = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<String> OWNER_UUID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Boolean> WAITING_FLAG = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.BOOLEAN);
+
+    private boolean isSleepingWithOwner = false;
+
+    @Override
+    public void setSleepingWithOwner(boolean sleeping) { this.isSleepingWithOwner = sleeping; }
+
+    @Override
+    public boolean isSleepingWithOwner() { return this.isSleepingWithOwner; }
 
     public void playerSetWaiting(Player player) { // 玩家修改等待状态
         if (this.foxCooldownTicks <= 0) {
@@ -141,12 +137,10 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
             AttributeInstance maxHealth = foxEntity.getAttribute(Attributes.MAX_HEALTH);
             maxHealth.addPermanentModifier(new AttributeModifier((Identifier.fromNamespaceAndPath(SuiKe.MOD_ID, "tamed_max_health")), 30.0, AttributeModifier.Operation.ADD_VALUE));
             foxEntity.setHealth(40f);
-            this.hasTamedMaxHealth = true;
             AttributeInstance armor = foxEntity.getAttribute(Attributes.ARMOR);
             armor.addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(SuiKe.MOD_ID, "tamed_armour"), 10.0, AttributeModifier.Operation.ADD_VALUE));
             AttributeInstance attackDamage = foxEntity.getAttribute(Attributes.ATTACK_DAMAGE);
             attackDamage.addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(SuiKe.MOD_ID, "tamed_attack_damage"), 2.0, AttributeModifier.Operation.ADD_VALUE));
-            this.hasTamedAttackDamage = true;
             this.setWaiting(true);
             this.mixinStopActions();
             foxEntity.setPersistenceRequired();
@@ -154,7 +148,7 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
             ((MobAccessor) this).getGoalSelector().addGoal(4, this.foxFollowOwnerGoal);
             ((MobAccessor) this).getGoalSelector().addGoal(-1, new FoxWaitingGoal(foxEntity));
             ((MobAccessor) this).getGoalSelector().addGoal(3, new FoxAttackWithOwnerGoal(foxEntity));
-            this.hasAttackWithOwnerGoal = true;
+            ((MobAccessor) this).getGoalSelector().addGoal(4, new FoxSleepWithOwnerGoal(foxEntity));
         }
     }
 

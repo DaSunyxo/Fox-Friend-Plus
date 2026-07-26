@@ -12,8 +12,6 @@ import suike.suikefoxfriend.api.IOwnable;
 
 import javax.swing.plaf.SeparatorUI;
 
-// TODO(Ravel): can not resolve target class FoxEntity.JumpChasingGoal
-// TODO(Ravel): can not resolve target class FoxEntity.JumpChasingGoal
 @Mixin(Fox.FoxPounceGoal.class)
 public class JumpChasingGoalMixin {
 
