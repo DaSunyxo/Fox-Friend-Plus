@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.Runnables;
 import net.fabricmc.fabric.api.networking.v1.*;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
@@ -94,6 +95,7 @@ public class SuiKe implements ModInitializer {
                         // 设置等待状态
                         else {
                             foxIOwnable.playerSetWaiting(player);
+                            player.swing(InteractionHand.MAIN_HAND, true);
                             return InteractionResult.SUCCESS;
                         }
 

@@ -5,6 +5,8 @@ import java.util.*;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.advancements.triggers.CriteriaTriggers;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -134,6 +136,10 @@ public abstract class FoxMixin implements IOwnable {//, Tameable {
         if (player != null) {
             Fox foxEntity = (Fox) (Object) this;
             this.setOwner(player);
+            if (!foxEntity.level().isClientSide()) {
+                ServerLevel level = (ServerLevel) foxEntity.level();
+                level.sendParticles(ParticleTypes.HEART, foxEntity.getX(), foxEntity.getY() + 1, foxEntity.getZ(), 10, 0.2, 0.5, 0.2, 1);
+            }
             AttributeInstance maxHealth = foxEntity.getAttribute(Attributes.MAX_HEALTH);
             maxHealth.addPermanentModifier(new AttributeModifier((Identifier.fromNamespaceAndPath(SuiKe.MOD_ID, "tamed_max_health")), 30.0, AttributeModifier.Operation.ADD_VALUE));
             foxEntity.setHealth(40f);
