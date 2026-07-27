@@ -47,12 +47,8 @@ public class SuiKe implements ModInitializer {
         Items.ROTTEN_FLESH, Items.SPIDER_EYE, Items.POISONOUS_POTATO, Items.SUSPICIOUS_STEW
     );
 
-    private static ArrayList<String> pendingLogins;
-
     @Override
     public void onInitialize() {
-
-        pendingLogins = new ArrayList<>();
 
         ServerLoginConnectionEvents.QUERY_START.register((handler, server, sender, sync) -> {
 

@@ -117,33 +117,40 @@ public class FoxFollowOwnerGoal extends Goal {
             int x = ownerPos.getX();
             int y = ownerPos.getY();
             int z = ownerPos.getZ();
-            switch (ownerFacing) {
-                case NORTH : {
-                    x += this.getRandomInt(-3, 3);
-                    y += this.getRandomInt(-1, 1);
-                    z += this.getRandomInt(1, 3);
-                    break;
-                }
-                case SOUTH : {
-                    x += this.getRandomInt(-3, 3);
-                    y += this.getRandomInt(-1, 1);
-                    z += this.getRandomInt(-3, -1);
-                    break;
-                }
+            if (owner.isOnRails()) {
+                switch (ownerFacing) {
+                    case NORTH: {
+                        x += this.getRandomInt(-3, 3);
+                        y += this.getRandomInt(-1, 1);
+                        z += this.getRandomInt(1, 3);
+                        break;
+                    }
+                    case SOUTH: {
+                        x += this.getRandomInt(-3, 3);
+                        y += this.getRandomInt(-1, 1);
+                        z += this.getRandomInt(-3, -1);
+                        break;
+                    }
 
-                case WEST : {
-                    x += this.getRandomInt(1, 3);
-                    y += this.getRandomInt(-1, 1);
-                    z += this.getRandomInt(-3, 3);
-                    break;
-                }
+                    case WEST: {
+                        x += this.getRandomInt(1, 3);
+                        y += this.getRandomInt(-1, 1);
+                        z += this.getRandomInt(-3, 3);
+                        break;
+                    }
 
-                case EAST : {
-                    x += this.getRandomInt(-3, -1);
-                    y += this.getRandomInt(-1, 1);
-                    z += this.getRandomInt(-3, 3);
-                    break;
+                    case EAST: {
+                        x += this.getRandomInt(-3, -1);
+                        y += this.getRandomInt(-1, 1);
+                        z += this.getRandomInt(-3, 3);
+                        break;
+                    }
                 }
+            }
+            else {
+                x += this.getRandomInt(-3, 3);
+                y += this.getRandomInt(-1, 1);
+                z += this.getRandomInt(-3, 3);
             }
             if (this.tryTeleportTo(x, y, z)) {
                 return;
@@ -152,9 +159,7 @@ public class FoxFollowOwnerGoal extends Goal {
     }
 
     private boolean tryTeleportTo(int x, int y, int z) {
-        if (Math.abs((double) x - this.owner.getX()) < 2.0D && Math.abs((double) z - this.owner.getZ()) < 2.0D) {
-            return false;
-        } else if (!this.canTeleportTo(new BlockPos(x, y, z))) {
+        if (!this.canTeleportTo(new BlockPos(x, y, z))) {
             return false;
         } else {
             this.fox.setPos((double) x + 0.5D, (double) y, (double) z + 0.5D);
@@ -164,7 +169,7 @@ public class FoxFollowOwnerGoal extends Goal {
     }
 
     private boolean canTeleportTo(BlockPos pos) {
-        PathType pathNodeType = WalkNodeEvaluator.getPathTypeStatic(this.fox, pos.mutable());
+        PathType pathNodeType = WalkNodeEvaluator.getPathTypeStatic(this.fox, pos);
         if (pathNodeType != PathType.WALKABLE) {
             return false;
         } else {
@@ -172,8 +177,7 @@ public class FoxFollowOwnerGoal extends Goal {
             if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() instanceof PoweredRailBlock || blockState.getBlock() instanceof PoweredRailBlock) {
                 return false;
             } else {
-                BlockPos blockPos = pos.subtract(this.fox.getOnPos());
-                return this.world.isEmptyBlock(blockPos);
+                return this.world.isEmptyBlock(pos);
             }
         }
     }
