@@ -21,7 +21,6 @@ public class FoxFriendClient implements ClientModInitializer {
 			if (message == 96) {
 				FriendlyByteBuf response = FriendlyByteBufs.create();
 				response.writeShort((short) 96);
-				SuiKe.LOGGER.warn("Received packet from server!");
 				return CompletableFuture.completedFuture(response);
 			}
 
