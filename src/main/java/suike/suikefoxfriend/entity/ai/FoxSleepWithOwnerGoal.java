@@ -37,7 +37,7 @@ public class FoxSleepWithOwnerGoal extends Goal {
         BlockPos ownerPos = this.owner.blockPosition();
         BlockState ownerPosState = this.fox.level().getBlockState(ownerPos);
         if (ownerPosState.is(BlockTags.BEDS)) {
-            this.goalPos = ownerPosState.getOptionalValue(BedBlock.FACING).map((bedDir) -> ownerPos.relative(bedDir.getOpposite())).orElseGet(() -> new BlockPos(ownerPos));
+            this.goalPos = ownerPosState.getOptionalValue(BedBlock.FACING).map((bedDir) -> ownerPos.relative(bedDir.getOpposite())).orElseGet(() -> new BlockPos(ownerPos.getX(), ownerPos.getY(), ownerPos.getZ()));
             return !this.spaceIsOccupied();
         }
         return owner.isSleeping() && !this.fox.isFaceplanted() && !this.ownableFox.isWaiting();

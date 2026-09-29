@@ -238,7 +238,7 @@ public abstract class FoxMixin extends Animal implements IOwnable {//, Tameable 
         if (this.isTamed()) {
             Fox foxEntity = (Fox) (Object) this;
 
-            foxEntity.setInvulnerable(waiting); // 设置无敌状态
+            foxEntity.setPermanentlyInvulnerable(waiting); // 设置无敌状态
             foxEntity.getEntityData().set(WAITING_FLAG, waiting);
 
             if (isPlayerSetWaiting.equals("isPlayer")) {

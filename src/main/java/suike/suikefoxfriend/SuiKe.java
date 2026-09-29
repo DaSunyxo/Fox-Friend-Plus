@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.component.SwingAnimation;
 import suike.suikefoxfriend.api.IOwnable;
 
 import net.minecraft.world.item.Item;
@@ -85,13 +86,13 @@ public class SuiKe implements ModInitializer {
                                 itemEntity.setThrower(foxEntity);
                                 foxEntity.playSound(SoundEvents.FOX_EAT, 1.0F, 1.0F);
                                 foxEntity.level().addFreshEntity(itemEntity);
-                                player.swing(InteractionHand.MAIN_HAND, true);
+                                player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                         }
                         // 设置等待状态
                         else {
                             foxIOwnable.playerSetWaiting(player);
-                            player.swing(InteractionHand.MAIN_HAND, true);
+                            player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             return InteractionResult.SUCCESS;
                         }
 
@@ -102,7 +103,7 @@ public class SuiKe implements ModInitializer {
 
                         // 设为驯服
                         foxIOwnable.playerTamedFox(player);
-                        player.swing(InteractionHand.MAIN_HAND, true);
+                        player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 						return InteractionResult.SUCCESS;
                     }
 				}
