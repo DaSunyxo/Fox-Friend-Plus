@@ -6,6 +6,7 @@
     "AttackGoalMixin",
     "AvoidEntityGoalMixin",
     "EntityMixin",
+    "FoxLeapAtTargetGoalMixin",
     "FoxMixin",
     "JumpChasingGoalMixin",
     "MobAccessor",
