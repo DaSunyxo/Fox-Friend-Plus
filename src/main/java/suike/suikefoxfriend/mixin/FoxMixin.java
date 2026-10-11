@@ -5,6 +5,7 @@ import java.util.*;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.advancements.triggers.CriteriaTriggers;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
@@ -141,6 +142,13 @@ public abstract class FoxMixin extends Animal implements IOwnable {//, Tameable 
     public void playerTamedFox(Player player) {
         if (player != null) {
             Fox foxEntity = (Fox) (Object) this;
+            if (this.getRandom().nextInt(3) != 0) {
+                if (!foxEntity.level().isClientSide()) {
+                    ServerLevel level = (ServerLevel) foxEntity.level();
+                    level.sendParticles(ParticleTypes.SMOKE, foxEntity.getX(), foxEntity.getY() + 1, foxEntity.getZ(), 10, 0, 0, 0, 0.05);
+                }
+                return;
+            }
             this.setOwner(player);
             if (!foxEntity.level().isClientSide()) {
                 ServerLevel level = (ServerLevel) foxEntity.level();
@@ -291,6 +299,8 @@ public abstract class FoxMixin extends Animal implements IOwnable {//, Tameable 
 
         Fox foxEntity = (Fox) (Object) this;
         IOwnable foxIOwnable = (IOwnable) foxEntity;
+
+        if (foxEntity.isInterested()) foxEntity.setIsInterested(false);
 
         if (((IOwnable) foxEntity).isTamed() && !((MobAccessor) this).getGoalSelector().getAvailableGoals().contains(new FoxAttackWithOwnerGoal(foxEntity))) ((MobAccessor) this).getGoalSelector().addGoal(3, new FoxAttackWithOwnerGoal(foxEntity));
         try {
@@ -459,20 +469,27 @@ public abstract class FoxMixin extends Animal implements IOwnable {//, Tameable 
             if (itemStack.has(DataComponents.FOOD) && itemStack.has(DataComponents.CONSUMABLE)) {
                 if (foxEntity.getTarget() == null && foxEntity.onGround() && !foxEntity.isSleeping()) {
                     if (ticksSinceEaten > 600) {
-                        foxEntity.heal(5f); //Heal 5 HP upon eating food
+                        foxEntity.heal(5); //Heal 5 HP upon eating food
                     }
                 }
             }
             //Regenerate 0.5 HP/s when resting
             if (foxEntity.isSleeping() || foxEntity.isSitting()) {
                 sleepingTime++;
-                if (sleepingTime % 40 == 0) foxEntity.heal(1f);
+                if (foxEntity.getHealth() < foxEntity.getMaxHealth()) {
+                    if (sleepingTime % 40 == 0) foxEntity.heal(1f);
+                    if (this.level() instanceof ServerLevel server && sleepingTime % 5 == 0) {
+                        server.sendParticles(
+                                ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFFCD5CAB),
+                                foxEntity.getRandomX(0.25), foxEntity.getRandomY(), foxEntity.getRandomZ(0.25),
+                                1,
+                                0, 0, 0,
+                                ((double) this.getRandom().nextInt(5)) / 10.0
+                        );
+                    }
+                }
             }
             ticksSinceEaten--;
-            //Increase damage dealt based on held item (useless because vanilla Minecraft already does this)
-//            AttributeInstance damage = foxEntity.getAttribute(EntityAttributes.ATTACK_DAMAGE);
-//            damage.clearModifiers();
-//            damage.addTemporaryModifier(new AttributeModifier((Identifier.of("held_item_damage")), foxEntity.getEquippedStack(EquipmentSlot.MAINHAND).getDamage(), AttributeModifier.Operation.ADD_VALUE));
         }
     }
 }
