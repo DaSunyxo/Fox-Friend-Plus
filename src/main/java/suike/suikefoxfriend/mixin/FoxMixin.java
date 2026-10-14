@@ -469,7 +469,7 @@ public abstract class FoxMixin extends Animal implements IOwnable {//, Tameable 
             if (itemStack.has(DataComponents.FOOD) && itemStack.has(DataComponents.CONSUMABLE)) {
                 if (foxEntity.getTarget() == null && foxEntity.onGround() && !foxEntity.isSleeping()) {
                     if (ticksSinceEaten > 600) {
-                        foxEntity.heal(5); //Heal 5 HP upon eating food
+                        foxEntity.heal(itemStack.getItem().components().get(DataComponents.FOOD).nutrition()); //Heal by the amount of hunger regained from consuming
                     }
                 }
             }
